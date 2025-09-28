@@ -214,6 +214,7 @@ int main(void) {
   int16_t board_temp_adcFilt  = adc_buffer.temp;
 
   #ifdef MULTI_MODE_DRIVE
+
     if (adc_buffer.l_tx2 > input1[0].min + 50 && adc_buffer.l_rx2 > input2[0].min + 50) {
       drive_mode = 2;
       max_speed = MULTI_MODE_DRIVE_M3_MAX;
@@ -233,7 +234,6 @@ int main(void) {
       rtP_Left.n_max = rtP_Right.n_max = MULTI_MODE_M1_N_MOT_MAX << 4;
       rtP_Left.i_max = rtP_Right.i_max = (MULTI_MODE_M1_I_MOT_MAX * A2BIT_CONV) << 4;
     }
-
     printf("Drive mode %i selected: max_speed:%i acc_rate:%i \r\n", drive_mode, max_speed, rate);
   #endif
 
@@ -553,28 +553,51 @@ int main(void) {
       #endif
       poweroff();
     } else if (rtY_Left.z_errCode || rtY_Right.z_errCode) {                                           // 1 beep (low pitch): Motor error, disable motors
+      #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+        printf("Motor error: rtY_Left.z_errCode = %d, rtY_Right.z_err = %d\r\n", rtY_Left.z_errCode, rtY_Right.z_errCode);
+      #endif
       enable = 0;
       beepCount(1, 24, 1);
     } else if (timeoutFlgADC) {                                                                       // 2 beeps (low pitch): ADC timeout
+      #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+        printf("ADC timeout\r\n");
+      #endif
       beepCount(2, 24, 1);
     } else if (timeoutFlgSerial) {                                                                    // 3 beeps (low pitch): Serial timeout
+      #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+        printf("Serial timeoout\r\n");
+      #endif
       beepCount(3, 24, 1);
     } else if (timeoutFlgGen) {                                                                       // 4 beeps (low pitch): General timeout (PPM, PWM, Nunchuk)
+      #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+        printf("General timeout\r\n");
+      #endif
       beepCount(4, 24, 1);
     } else if (TEMP_WARNING_ENABLE && board_temp_deg_c >= TEMP_WARNING) {                             // 5 beeps (low pitch): Mainboard temperature warning
+      #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+        printf("Temperature overheat\r\n");
+      #endif
       beepCount(5, 24, 1);
     } else if (BAT_LVL1_ENABLE && batVoltage < BAT_LVL1) {                                            // 1 beep fast (medium pitch): Low bat 1
+      #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+        printf("Low bat 1\r\n");
+      #endif
       beepCount(0, 10, 6);
     } else if (BAT_LVL2_ENABLE && batVoltage < BAT_LVL2) {                                            // 1 beep slow (medium pitch): Low bat 2
+      #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+        printf("Low bat 2\r\n");
+      #endif
       beepCount(0, 10, 30);
     } else if (BEEPS_BACKWARD && (((cmdR < -50 || cmdL < -50) && speedAvg < 0) || MultipleTapBrake.b_multipleTap)) { // 1 beep fast (high pitch): Backward spinning motors
+      #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
+        printf("Backword spinning motors\r\n");
+      #endif
       beepCount(0, 5, 1);
       backwardDrive = 1;
     } else {  // do not beep
       beepCount(0, 0, 0);
       backwardDrive = 0;
     }
-
 
     inactivity_timeout_counter++;
 
